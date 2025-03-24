@@ -89,28 +89,37 @@ class Review:
     @classmethod
     def find_by_id(cls, id):
         """Return a Review instance having the attribute values from the table row."""
-        if id in cls.all:
-            return cls.all[id]
-        
         sql = "SELECT * FROM reviews WHERE id = ?"
         row = CURSOR.execute(sql, (id,)).fetchone()
+        return cls.instance_from_db(row) if row else None
 
-        if row:
-            return cls.instance_from_db(row)
-        
-        return None
 
     def update(self):
         """Update the table row corresponding to the current Review instance."""
-        pass
+        sql = """
+            UPDATE reviews
+            SET year = ?, summary = ?
+            WHERE id = ?;
+        """
+        CURSOR.execute(sql, (self.year, self.summary, self.id))
+        CONN.commit()
 
     def delete(self):
         """Delete the table row corresponding to the current Review instance,
         delete the dictionary entry, and reassign id attribute"""
-        pass
+        sql = "DELETE FROM reviews WHERE id = ?"
+        CURSOR.execute(sql, (self.id,))
+        CONN.commit()
+
+        if self.id in self.__class__.all:
+            del self.__class__.all[self.id]
+        
+        self.id = None
 
     @classmethod
     def get_all(cls):
         """Return a list containing one Review instance per table row"""
-        pass
+        sql = "SELECT * FROM reviews"
+        rows = CURSOR.execute(sql).fetchall()
 
+        return [cls.instance_from_db(row) for row in rows] if rows else []
