@@ -13,6 +13,44 @@ class Review:
         self.year = year
         self.summary = summary
         self.employee_id = employee_id
+    
+    @property
+    def year(self):
+        return self._year
+    
+    @year.setter
+    def year(self, value):
+        if not isinstance(value, int):
+            raise ValueError("year has to be an int")
+        if not value >= 2000:
+            raise ValueError("year has to be >= 2000")
+        self._year = value
+    
+    @property
+    def summary(self):
+        return self._summary
+    
+    @summary.setter
+    def summary(self, value):
+        if not isinstance(value, str):
+            raise ValueError("summary has to be a string")
+        if not len(value) > 0:
+            raise ValueError("Summary must be > 0")
+        self._summary = value
+    
+    @property
+    def employee_id(self):
+        return self._employee_id
+
+    @employee_id.setter
+    def employee_id(self, value):
+        sql = "SELECT id FROM employees WHERE id = ?"
+        result = CURSOR.execute(sql, (value,)).fetchone()
+
+        if result is None:
+            raise ValueError(f"Employee_id with id: {value} doesn't exist")
+            
+        self._employee_id = value
 
     def __repr__(self):
         return (
